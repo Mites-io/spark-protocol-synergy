@@ -22,7 +22,7 @@ var EventPublisher = require('../lib/EventPublisher.js');
 var utilities = require('../lib/utilities.js');
 var logger = require('../lib/logger.js');
 var crypto = require('crypto');
-var ursa = require('ursa');
+// var ursa = require('ursa');
 var when = require('when');
 var path = require('path');
 var net = require('net');
@@ -290,7 +290,17 @@ DeviceServer.prototype = {
         //
         if (!fs.existsSync(settings.serverKeyFile)) {
             console.warn("Creating NEW server key");
-            var keys = ursa.generatePrivateKey();
+            var keys = crypto.generateKeyPairSync('rsa', {
+                modulusLength: 2048,  // This matches ursa's default key size
+                publicKeyEncoding: {
+                    type: 'spki',
+                    format: 'pem'
+                },
+                privateKeyEncoding: {
+                    type: 'pkcs8',
+                    format: 'pem'
+                }
+            });
 
 
             var extIdx = settings.serverKeyFile.lastIndexOf(".");
