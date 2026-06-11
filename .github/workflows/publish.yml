@@ -1,0 +1,24 @@
+name: publish
+
+# Publishes the package to the public npm registry when a GitHub Release is
+# published. Uses OIDC trusted publishing (no stored NPM_TOKEN) — configure
+# the trusted publisher once on npmjs.com under the package's Settings.
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # required for OIDC trusted publishing + provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      - run: npm test
+      - run: npm publish

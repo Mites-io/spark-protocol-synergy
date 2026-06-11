@@ -1,67 +1,67 @@
-spark-protocol
-================
+# @mites-io/spark-protocol-synergy
 
-  Node.JS module for hosting direct encrypted CoAP socket connections!  Checkout the local [spark-server](https://github.com/spark/spark-server)
+A TCP gateway library that speaks the Particle **Photon** "spark" protocol: it runs the device handshake (RSA to agree a key, then an AES-128-CBC encrypted session) and hands you decoded CoAP messages over plain Node `EventEmitter`s. It is the connection layer between a fleet of Photon sensor boards and whatever backend stores their data.
 
-<pre>
-                          __      __        __              __
-   _________  ____ ______/ /__   / /___  __/ /_  ___  _____/ /
-  / ___/ __ \/ __ `/ ___/ //_/  / __/ / / / __ \/ _ \/ ___/ / 
- (__  ) /_/ / /_/ / /  / , |   / /_/ /_/ / /_/ /  __(__  )_/  
-/____/ .___/\__,_/_/  /_/|_|   \__/\__,_/_.___/\___/____(_)   
-    /_/                                                       
-</pre>
+It is built entirely on Node built-ins — `crypto`, `net`, `worker_threads`, `events` — with **no native dependencies and no runtime npm dependencies**. That is the whole point: the predecessor this is extracted from was pinned to Node 8 / Ubuntu 16.04 by a native RSA binding (`ursa`), and this library exists so that pin never happens again.
 
+## Status and scope
 
-What do I need to know?
-========================
+This is published primarily as the device-gateway layer for the Mites backend. It is a focused library, not a framework — it does the handshake and the encrypted session, emits events, and stops there. It does **not** decode any particular sensor payload, talk to any database, or expose any metrics; those are the host application's job, wired off the events this library emits. External use is welcome but unsupported: treat the published versions as a moving target gated by semver.
 
-  This module knows how to talk encrypted CoAP.  It's really good at talking with Spark Cores, and any other hardware that uses this protocol.  You'll need a server key to use and load onto your devices.  You'll also need to grab any public keys for your connected devices and store them somewhere this module can find them.  The public server key stored on the device can also store an IP address or DNS name for your server, so make sure you load that onto your server key when copying it to your device.  The server will also generate a default key if you don't have one when it starts up.
+## License
 
-What code modules should I start with?
-============================================
+**LGPL-3.0** (see `LICENSE.txt`). This is a clean-room descendant of `particle/spark-protocol`, which is LGPL, and it stays LGPL. The LGPL is a per-library copyleft with no network clause: an application that merely depends on this package — as a separate, unmodified library pulled from npm — carries no copyleft obligation of its own. If you modify *this library* and ship it, those modifications stay LGPL.
 
-There's lots of fun stuff here, but in particular you should know about the "SparkCore" ( https://github.com/spark/spark-protocol/blob/master/js/clients/SparkCore.js ) , and "DeviceServer" ( https://github.com/spark/spark-protocol/blob/master/js/server/DeviceServer.js ) modules.  The "DeviceServer" module runs a server that creates "SparkCore" objects, which represent your connected devices.
+## Install
 
-
-How do I start a server in code?
----------------------------
-
+```bash
+npm install @mites-io/spark-protocol-synergy
 ```
-var DeviceServer = require("spark-protocol").DeviceServer;
-var server = new DeviceServer({
-    coreKeysDir: "/path/to/your/public_device_keys"
+
+Requires Node ≥ 20.
+
+## Wire it up
+
+```js
+import { CryptoPool, makeFsCoreKeyLoader, Gateway } from '@mites-io/spark-protocol-synergy';
+import { readFileSync } from 'node:fs';
+
+const crypto = new CryptoPool();                                  // RSA worker pool, sized to the CPU count
+const serverPrivKeyPem = readFileSync('keys/srv_keys/default_key.pem', 'utf8');
+const loadCoreKey = makeFsCoreKeyLoader('keys/core_keys');         // per-device public keys on disk
+
+const gateway = new Gateway({
+  port: 5683,
+  crypto,
+  serverPrivKeyPem,
+  loadCoreKey,
+  registry: myRegistry,        // any object with register(session) / unregister(coreId)
 });
-global.server = server;
-server.start();
 
+gateway.on('session', (session, { durationMs }) => {
+  console.log('device online', session.coreId, `(${durationMs} ms)`);
+  session.on('message', (msg) => { /* your sensor decode, your storage */ });
+});
+gateway.on('handshake_failed', ({ coreId, stage, result }) => {
+  console.warn('handshake failed', coreId, 'at', stage, '-', result);
+});
+
+await gateway.start();
 ```
 
+The gateway never reaches into your metrics or logging — every operationally interesting moment is an event (`connection`, `session`, `handshake_failed`, `session_disconnected`, `error`), and you decide what each one means.
 
-How do I get my key / ip address on my core?
-================================================
+## Documentation
 
-1.) Figure out your IP address, for now lets say it's 192.168.1.10
+- **`Usage.md`** — the full integration guide: every constructor option, the complete event contract with payload shapes, sending requests to a device, building OTA / operator frames, and clean shutdown.
+- **`Implementation.md`** — the protocol internals: the six-stage handshake byte-by-byte, the rolling-IV AES session, the CoAP codec, the TCP framing (and why it is asymmetric), the trust-on-first-use key model, and the RSA worker pool.
 
-2.) Make sure you have the Spark-CLI (https://github.com/spark/spark-cli) installed
+## The public API
 
-3.) Connect your Spark Core to your computer in listening mode (http://docs.spark.io/connect/#appendix-dfu-mode-device-firmware-upgrade)
-
-4.) Load the server key and include your IP address / dns address:
-
-```
-spark keys server server_public_key.der your_ip_address
-spark keys server server_public_key.der 192.168.1.10
-```
-
-5.) That's it!
-
-
-Where's the API / webserver stuff, this is just a TCP server?
-===========================================================================
-
-  Oh, you want the Spark-Server module here: https://github.com/spark/spark-server  :)
-  
-  
-
-
+| Export | What it is |
+|---|---|
+| `Gateway` | TCP listener; one `Session` per connection; emits the lifecycle events. |
+| `Session` | Per-device state machine: drives the handshake, runs the message loop, exposes `send()` / `request()`. |
+| `CryptoPool` | `worker_threads` pool for the handshake's RSA math. Host owns its lifecycle. |
+| `makeFsCoreKeyLoader` | Convenience filesystem loader for per-device public keys. The `Gateway` takes `loadCoreKey` as an injected function, so you can supply your own (DB, KMS) instead. |
+| `Code`, `Option`, `Type` | CoAP constants, for building request frames against the wire format. |
