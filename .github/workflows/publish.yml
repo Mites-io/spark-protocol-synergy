@@ -18,7 +18,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22   # must match engines (>=22): Node 20 blocks the firmware's PKCS#1 v1.5 decrypt (CVE-2023-46809 mitigation)
           registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@latest   # OIDC trusted publishing needs npm >= 11.5
       - run: npm test
       - run: npm publish

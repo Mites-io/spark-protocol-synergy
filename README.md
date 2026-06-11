@@ -65,3 +65,5 @@ The gateway never reaches into your metrics or logging — every operationally i
 | `CryptoPool` | `worker_threads` pool for the handshake's RSA math. Host owns its lifecycle. |
 | `makeFsCoreKeyLoader` | Convenience filesystem loader for per-device public keys. The `Gateway` takes `loadCoreKey` as an injected function, so you can supply your own (DB, KMS) instead. |
 | `Code`, `Option`, `Type` | CoAP constants, for building request frames against the wire format. |
+
+The barrel above is the supported API. The internal modules are also reachable as subpaths — `import { aesEncrypt } from '@mites-io/spark-protocol-synergy/lib/crypto.js'` — for advanced use such as building a synthetic device in tests. Those internals carry no stability guarantee; depend on the barrel for anything load-bearing.

@@ -1,11 +1,12 @@
 {
   "name": "@mites-io/spark-protocol-synergy",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Spark/CoAP TCP gateway for Particle Photon devices — handshake (RSA then AES-128-CBC) and encrypted session layer, on Node built-ins with no native dependencies.",
   "type": "module",
   "main": "index.js",
   "exports": {
-    ".": "./index.js"
+    ".": "./index.js",
+    "./lib/*": "./lib/*"
   },
   "files": [
     "index.js",
@@ -40,7 +41,7 @@
   ],
   "license": "LGPL-3.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "publishConfig": {
     "access": "public",
