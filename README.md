@@ -2,7 +2,7 @@
 
 A TCP gateway library that speaks the Particle **Photon** "spark" protocol: it runs the device handshake (RSA to agree a key, then an AES-128-CBC encrypted session) and hands you decoded CoAP messages over plain Node `EventEmitter`s. It is the connection layer between a fleet of Photon sensor boards and whatever backend stores their data.
 
-It is built entirely on Node built-ins — `crypto`, `net`, `worker_threads`, `events` — with **no native dependencies and no runtime npm dependencies**. That is the whole point: the predecessor this is extracted from was pinned to Node 8 / Ubuntu 16.04 by a native RSA binding (`ursa`), and this library exists so that pin never happens again.
+This is a rewrite of https://github.com/particle-iot/spark-protocol that uses modern Node builtins such as crypto, net, worker_threads, events to interact with the devices without requiring native dependencies.
 
 ## Status and scope
 
@@ -10,7 +10,7 @@ This is published primarily as the device-gateway layer for the Mites backend. I
 
 ## License
 
-**LGPL-3.0** (see `LICENSE.txt`). This is a clean-room descendant of `particle/spark-protocol`, which is LGPL, and it stays LGPL. The LGPL is a per-library copyleft with no network clause: an application that merely depends on this package — as a separate, unmodified library pulled from npm — carries no copyleft obligation of its own. If you modify *this library* and ship it, those modifications stay LGPL.
+LGPL-3.0
 
 ## Install
 
@@ -18,7 +18,7 @@ This is published primarily as the device-gateway layer for the Mites backend. I
 npm install @mites-io/spark-protocol-synergy
 ```
 
-Requires Node ≥ 20.
+Requires Node ≥ 22.
 
 ## Wire it up
 
@@ -49,8 +49,6 @@ gateway.on('handshake_failed', ({ coreId, stage, result }) => {
 await gateway.start();
 ```
 
-The gateway never reaches into your metrics or logging — every operationally interesting moment is an event (`connection`, `session`, `handshake_failed`, `session_disconnected`, `error`), and you decide what each one means.
-
 ## Documentation
 
 - **`Usage.md`** — the full integration guide: every constructor option, the complete event contract with payload shapes, sending requests to a device, building OTA / operator frames, and clean shutdown.
@@ -65,5 +63,3 @@ The gateway never reaches into your metrics or logging — every operationally i
 | `CryptoPool` | `worker_threads` pool for the handshake's RSA math. Host owns its lifecycle. |
 | `makeFsCoreKeyLoader` | Convenience filesystem loader for per-device public keys. The `Gateway` takes `loadCoreKey` as an injected function, so you can supply your own (DB, KMS) instead. |
 | `Code`, `Option`, `Type` | CoAP constants, for building request frames against the wire format. |
-
-The barrel above is the supported API. The internal modules are also reachable as subpaths — `import { aesEncrypt } from '@mites-io/spark-protocol-synergy/lib/crypto.js'` — for advanced use such as building a synthetic device in tests. Those internals carry no stability guarantee; depend on the barrel for anything load-bearing.

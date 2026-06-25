@@ -121,7 +121,3 @@ const reply = await session.request('VariableRequest', {
 await gateway.stop();    // stop accepting, FIN every live session, close the listener
 await crypto.stop();     // terminate the RSA worker threads
 ```
-
-## A note on metrics and logging
-
-This library deliberately has no opinion about either. The reference backend wires its Prometheus counters by subscribing to the events above — `connection` → an accept counter, `session` → a handshake-success counter plus a duration histogram off `durationMs`, `handshake_failed` → a failure counter labelled by `result`, and so on. Keeping that translation in the host is what lets the same library run unchanged under any observability stack.
