@@ -1,69 +1,51 @@
 {
-  "_from": "git+https://git@github.com/IoT-Expedition/spark-protocol-synergy.git#master",
-  "_id": "spark-protocol-synergy@0.1.7",
-  "_inBundle": false,
-  "_location": "/spark-protocol-synergy",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "git",
-    "raw": "spark-protocol-synergy@git+https://git@github.com/IoT-Expedition/spark-protocol-synergy.git#master",
-    "name": "spark-protocol-synergy",
-    "escapedName": "spark-protocol-synergy",
-    "rawSpec": "git+https://git@github.com/IoT-Expedition/spark-protocol-synergy.git#master",
-    "saveSpec": "git+https://git@github.com/IoT-Expedition/spark-protocol-synergy.git#master",
-    "fetchSpec": "https://git@github.com/IoT-Expedition/spark-protocol-synergy.git",
-    "gitCommittish": "master"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "git+https://git@github.com/IoT-Expedition/spark-protocol-synergy.git#6c2e017323dc6e86c95cf485a71329aa266cd07d",
-  "_spec": "spark-protocol-synergy@git+https://git@github.com/IoT-Expedition/spark-protocol-synergy.git#master",
-  "_where": "/home/synergy/git/test/MitesBackend-2.0/slave",
-  "author": {
-    "name": "David Middlecamp",
-    "email": "david@spark.io",
-    "url": "https://www.spark.io/"
-  },
-  "bugs": {
-    "url": "https://github.com/IoT-Expedition/spark-protocol-synergy/issues"
-  },
-  "bundleDependencies": false,
-  "contributors": [
-    {
-      "name": "Sudershan Boovaraghavan",
-      "email": "sud335@gmail.com"
-    },
-    {
-      "name": "Chen Chen",
-      "email": "chenchenece@gmail.com"
-    },
-    {
-      "name": "Abhijit Hota",
-      "email": "hotaabhijit777@gmail.com"
-    }
-  ],
-  "dependencies": {
-    "bindings": "*",
-    "buffer-crc32": "~0.2.3",
-    "h5.buffers": "~0.1.1",
-    "h5.coap": "git+https://github.com/morkai/h5.coap.git",
-    "hogan.js": "*",
-    "moment": "*",
-    "node-gyp": "*",
-    "ursa": "*",
-    "when": "*",
-    "xtend": "*"
-  },
-  "deprecated": false,
-  "description": "spark-protocol ================",
-  "homepage": "https://github.com/IoT-Expedition/spark-protocol-synergy#readme",
-  "license": "AGPL-3.0",
+  "name": "@mites-io/spark-protocol-synergy",
+  "version": "1.0.3",
+  "description": "Spark/CoAP TCP gateway for Particle Photon devices — handshake (RSA then AES-128-CBC) and encrypted session layer, on Node built-ins with no native dependencies.",
+  "type": "module",
   "main": "index.js",
-  "name": "spark-protocol-synergy",
+  "exports": {
+    ".": "./index.js",
+    "./lib/*": "./lib/*"
+  },
+  "files": [
+    "index.js",
+    "lib/",
+    "README.md",
+    "Usage.md",
+    "Implementation.md",
+    "LICENSE.txt"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/IoT-Expedition/spark-protocol-synergy.git"
+    "url": "git+https://github.com/Mites-io/spark-protocol-synergy.git"
   },
-  "version": "0.1.7"
+  "keywords": [
+    "particle",
+    "photon",
+    "spark",
+    "coap",
+    "handshake",
+    "iot",
+    "mites"
+  ],
+  "author": "Mites.io",
+  "contributors": [
+    "David Middlecamp (original spark-protocol)",
+    "Sudershan Boovaraghavan",
+    "Chen Chen",
+    "Abhijit Hota"
+  ],
+  "license": "LGPL-3.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {}
 }
